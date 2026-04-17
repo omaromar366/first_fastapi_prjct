@@ -6,7 +6,7 @@ authors = [
     { name = "Your Name", email = "you@example.com" }
 ]
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.12"
 dependencies = [
     "ruff (>=0.15.10,<0.16.0)",
     "mypy (>=1.20.1,<2.0.0)",
@@ -15,7 +15,10 @@ dependencies = [
     "radon (>=6.0.1,<7.0.0)",
     "pre-commit (>=4.5.1,<5.0.0)",
     "fastapi",
-    "uvicorn[standard]"
+    "uvicorn[standard]",
+    "pydantic-settings",
+    "alembic (>=1.18.4,<2.0.0)",
+    "psycopg (>=3.3.3,<4.0.0)"
 ]
 
 
@@ -52,3 +55,11 @@ warn_unused_configs = true
 check_untyped_defs = true
 disallow_incomplete_defs = true
 no_implicit_optional = true
+
+[tool.poetry]
+name = "first-fastapi-prjct"
+version = "0.1.0"
+
+packages = [
+    { include = "app", from = "src" }
+]
