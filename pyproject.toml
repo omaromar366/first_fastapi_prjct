@@ -18,7 +18,8 @@ dependencies = [
     "uvicorn[standard]",
     "pydantic-settings",
     "alembic (>=1.18.4,<2.0.0)",
-    "psycopg (>=3.3.3,<4.0.0)"
+    "psycopg (>=3.3.3,<4.0.0)",
+    "pydantic (>=2.13.2,<3.0.0)"
 ]
 
 
