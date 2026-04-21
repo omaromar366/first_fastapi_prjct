@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.parcel import Parcel
@@ -16,3 +17,20 @@ def create_parcel(db: Session, parcel_data: ParcelCreate, session_id: str) -> Pa
     db.commit()
     db.refresh(parcel)
     return parcel
+
+
+def get_parcel_by_id(db: Session, parcel_id: int) -> Parcel:
+    statement = select(Parcel).where(Parcel.id == parcel_id)
+    result = db.execute(statement)
+    parcel = result.scalar_one_or_none()
+    return parcel
+
+
+def get_parcels(db: Session, limit: int, offset: int, type_id: int | None = None) -> list[Parcel]:
+    statement = select(Parcel)
+    if type_id:
+        statement = select(Parcel).where(Parcel.type_id == type_id)
+    statement = statement.limit(limit).offset(offset)
+    result = db.execute(statement)
+    parcels = list(result.scalars().all())
+    return parcels
