@@ -19,17 +19,29 @@ def create_parcel(db: Session, parcel_data: ParcelCreate, session_id: str) -> Pa
     return parcel
 
 
-def get_parcel_by_id(db: Session, parcel_id: int) -> Parcel:
-    statement = select(Parcel).where(Parcel.id == parcel_id)
+def get_parcel_by_id(db: Session, parcel_id: int, session_id: str) -> Parcel | None:
+    statement = select(Parcel).where(Parcel.id == parcel_id, Parcel.session_id == session_id)
     result = db.execute(statement)
     parcel = result.scalar_one_or_none()
     return parcel
 
 
-def get_parcels(db: Session, limit: int, offset: int, type_id: int | None = None) -> list[Parcel]:
-    statement = select(Parcel)
-    if type_id:
-        statement = select(Parcel).where(Parcel.type_id == type_id)
+def get_parcels(
+    db: Session,
+    session_id: str,
+    limit: int,
+    offset: int,
+    type_id: int | None = None,
+    has_delivery_cost: bool | None = None,
+) -> list[Parcel]:
+    statement = select(Parcel).where(Parcel.session_id == session_id)
+    if type_id is not None:
+        statement = statement.where(Parcel.type_id == type_id)
+    if has_delivery_cost is True:
+        statement = statement.where(Parcel.delivery_cost_rub.is_not(None))
+    if has_delivery_cost is False:
+        statement = statement.where(Parcel.delivery_cost_rub.is_(None))
+
     statement = statement.limit(limit).offset(offset)
     result = db.execute(statement)
     parcels = list(result.scalars().all())
