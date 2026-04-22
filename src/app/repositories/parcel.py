@@ -57,3 +57,10 @@ def get_unpriced_parcels_by_session_id(db: Session, session_id: str) -> list[Par
     result = db.execute(statement)
     parcels = list(result.scalars().all())
     return parcels
+
+
+def get_all_unpriced_parcels(db: Session) -> list[Parcel]:
+    statement = select(Parcel).where(Parcel.delivery_cost_rub.is_(None))
+    result = db.execute(statement)
+    parcels = list(result.scalars().all())
+    return parcels
