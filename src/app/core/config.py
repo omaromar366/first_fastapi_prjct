@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_db: str
 
+    redis_host: str
+    redis_port: int
+    redis_db: int
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",
@@ -27,6 +31,10 @@ class Settings(BaseSettings):
             f"{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
 
 settings = Settings()  # type: ignore[call-arg]

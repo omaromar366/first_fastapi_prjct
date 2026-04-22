@@ -5,6 +5,7 @@ from app.core.db import get_db
 from app.core.session import get_or_create_session_id
 from app.repositories.parcel import create_parcel, get_parcel_by_id, get_parcels
 from app.schemas.parcel import ParcelCreate, ParcelResponse
+from app.services.calculate_delivery import calculate_delivery_for_parcels
 
 router = APIRouter()
 
@@ -66,4 +67,19 @@ def get_parcels_endpoint(
         session_id=session_id,
         has_delivery_cost=has_delivery_cost,
     )
+    return parcels
+
+
+@router.post("/parcels/calculate", response_model=list[ParcelResponse])
+def calculate_parcel_endpoint(
+    request: Request,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> list[ParcelResponse]:
+    session_id = request.cookies.get("session_id")
+
+    if session_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+
+    parcels = calculate_delivery_for_parcels(db=db, session_id=session_id)
+
     return parcels
