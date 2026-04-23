@@ -8,6 +8,8 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 class Settings(BaseSettings):
     app_name: str
     debug: bool
+    app_env: str
+    log_level: str
 
     postgres_host: str
     postgres_port: int

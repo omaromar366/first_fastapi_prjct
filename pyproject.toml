@@ -6,7 +6,7 @@ authors = [
     { name = "Your Name", email = "you@example.com" }
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "ruff (>=0.15.10,<0.16.0)",
     "mypy (>=1.20.1,<2.0.0)",
@@ -22,7 +22,8 @@ dependencies = [
     "pydantic (>=2.13.2,<3.0.0)",
     "redis (>=7.4.0,<8.0.0)",
     "httpx (>=0.28.1,<0.29.0)",
-    "apscheduler (>=3.11.2,<4.0.0)"
+    "apscheduler (>=3.11.2,<4.0.0)",
+    "loguru (>=0.7.3,<0.8.0)"
 ]
 
 
@@ -66,4 +67,9 @@ version = "0.1.0"
 
 packages = [
     { include = "app", from = "src" }
+]
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.3,<10.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
 ]
