@@ -16,7 +16,7 @@ async def create_parcel_endpoint(
     parcel_data: ParcelCreate,
     request: Request,
     response: Response,
-    db: AsyncSession = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
 ) -> ParcelResponse:
     session_id, is_new = get_or_create_session_id(request)
     logger.info(
@@ -43,7 +43,7 @@ async def create_parcel_endpoint(
 async def get_parcel_by_id_endpoint(
     parcel_id: int,
     request: Request,
-    db: AsyncSession = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
 ) -> ParcelResponse:
     session_id = request.cookies.get("session_id")
     logger.info(
@@ -84,7 +84,7 @@ async def get_parcels_endpoint(
     offset: int = 0,
     type_id: int | None = None,
     has_delivery_cost: bool | None = None,
-    db: AsyncSession = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
 ) -> list[ParcelResponse]:
     session_id = request.cookies.get("session_id")
     logger.info(
@@ -117,7 +117,7 @@ async def get_parcels_endpoint(
 @router.post("/parcels/calculate", response_model=list[ParcelResponse])
 async def calculate_parcel_endpoint(
     request: Request,
-    db: AsyncSession = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
 ) -> list[ParcelResponse]:
     session_id = request.cookies.get("session_id")
     logger.info("Calculate parcels request: session_id={}", session_id)

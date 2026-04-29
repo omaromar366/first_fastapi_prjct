@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.get("/parcel-types", response_model=list[ParcelTypeResponse])
 async def get_parcel_types_endpoint(
-    db: AsyncSession = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
 ) -> list[ParcelTypeResponse]:
     parcel_types = await get_parcel_types(db)
     return parcel_types
