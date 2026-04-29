@@ -1,20 +1,22 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
 
-from app.core.db import SessionLocal
+from app.core.db import AsyncSessionLocal
 from app.services.calculate_delivery import calculate_delivery_for_all_parcels
 
-scheduler = BackgroundScheduler()
+scheduler = AsyncIOScheduler()
 
 
-def calculate_delivery_job() -> None:
+async def calculate_delivery_job() -> None:
     logger.info("Scheduler job started")
-    db = SessionLocal()
     try:
-        parcels = calculate_delivery_for_all_parcels(db=db)
+        async with AsyncSessionLocal() as db:
+            parcels = await calculate_delivery_for_all_parcels(db=db)
+
         logger.info("Scheduler processed {} parcels", len(parcels))
-    finally:
-        db.close()
+
+    except Exception:
+        logger.exception("Scheduler job failed")
 
 
 def start_scheduler() -> None:
@@ -22,7 +24,7 @@ def start_scheduler() -> None:
         scheduler.add_job(
             calculate_delivery_job,
             trigger="interval",
-            seconds=5,
+            minutes=5,
             id="calculate_delivery_job",
         )
 

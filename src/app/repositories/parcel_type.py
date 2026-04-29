@@ -1,11 +1,11 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import ParcelType
 
 
-def get_parcel_types(db: Session) -> list[ParcelType]:
+async def get_parcel_types(db: AsyncSession) -> list[ParcelType]:
     statement = select(ParcelType)
-    result = db.execute(statement)
+    result = await db.execute(statement)
     parcel_types = list(result.scalars().all())
     return parcel_types

@@ -1,11 +1,11 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.parcel import Parcel
 from app.schemas.parcel import ParcelCreate
 
 
-def create_parcel(db: Session, parcel_data: ParcelCreate, session_id: str) -> Parcel:
+async def create_parcel(db: AsyncSession, parcel_data: ParcelCreate, session_id: str) -> Parcel:
     parcel = Parcel(
         name=parcel_data.name,
         weight=parcel_data.weight,
@@ -14,20 +14,20 @@ def create_parcel(db: Session, parcel_data: ParcelCreate, session_id: str) -> Pa
         session_id=session_id,
     )
     db.add(parcel)
-    db.commit()
-    db.refresh(parcel)
+    await db.commit()
+    await db.refresh(parcel)
     return parcel
 
 
-def get_parcel_by_id(db: Session, parcel_id: int, session_id: str) -> Parcel | None:
+async def get_parcel_by_id(db: AsyncSession, parcel_id: int, session_id: str) -> Parcel | None:
     statement = select(Parcel).where(Parcel.id == parcel_id, Parcel.session_id == session_id)
-    result = db.execute(statement)
+    result = await db.execute(statement)
     parcel = result.scalar_one_or_none()
     return parcel
 
 
-def get_parcels(
-    db: Session,
+async def get_parcels(
+    db: AsyncSession,
     session_id: str,
     limit: int,
     offset: int,
@@ -43,24 +43,24 @@ def get_parcels(
         statement = statement.where(Parcel.delivery_cost_rub.is_(None))
 
     statement = statement.limit(limit).offset(offset)
-    result = db.execute(statement)
+    result = await db.execute(statement)
     parcels = list(result.scalars().all())
     return parcels
 
 
-def get_unpriced_parcels_by_session_id(db: Session, session_id: str) -> list[Parcel]:
+async def get_unpriced_parcels_by_session_id(db: AsyncSession, session_id: str) -> list[Parcel]:
     statement = (
         select(Parcel)
         .where(Parcel.session_id == session_id)
         .where(Parcel.delivery_cost_rub.is_(None))
     )
-    result = db.execute(statement)
+    result = await db.execute(statement)
     parcels = list(result.scalars().all())
     return parcels
 
 
-def get_all_unpriced_parcels(db: Session) -> list[Parcel]:
+async def get_all_unpriced_parcels(db: AsyncSession) -> list[Parcel]:
     statement = select(Parcel).where(Parcel.delivery_cost_rub.is_(None))
-    result = db.execute(statement)
+    result = await db.execute(statement)
     parcels = list(result.scalars().all())
     return parcels

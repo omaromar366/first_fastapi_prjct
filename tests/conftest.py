@@ -1,7 +1,7 @@
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from app.core.base import Base
@@ -10,48 +10,45 @@ from app.main import app
 from app.models.parcel_type import ParcelType
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite://"
-engine = create_engine(
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite://"
+engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
 
-TestingSessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
+TestingSessionLocal = async_sessionmaker(
     bind=engine,
+    autoflush=False,
+    expire_on_commit=False,
 )
 
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def override_get_db():
+    async with TestingSessionLocal() as session:
+        yield session
 
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture
-def db():
-    Base.metadata.create_all(bind=engine)
+@pytest_asyncio.fixture
+async def db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-    session = TestingSessionLocal()
-    session.add_all(
-        [
-            ParcelType(name="одежда"),
-            ParcelType(name="электроника"),
-            ParcelType(name="разное"),
-        ]
-    )
-    session.commit()
-    session.close()
+    async with TestingSessionLocal() as session:
+        session.add_all(
+            [
+                ParcelType(name="одежда"),
+                ParcelType(name="электроника"),
+                ParcelType(name="разное"),
+            ]
+        )
+        await session.commit()
 
-    try:
-        yield
-    finally:
-        Base.metadata.drop_all(bind=engine)
+    yield
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture

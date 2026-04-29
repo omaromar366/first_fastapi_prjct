@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from loguru import logger
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.session import get_or_create_session_id
@@ -12,11 +12,11 @@ router = APIRouter()
 
 
 @router.post("/parcels", response_model=ParcelResponse)
-def create_parcel_endpoint(
+async def create_parcel_endpoint(
     parcel_data: ParcelCreate,
     request: Request,
     response: Response,
-    db: Session = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),  # noqa: B008
 ) -> ParcelResponse:
     session_id, is_new = get_or_create_session_id(request)
     logger.info(
@@ -29,7 +29,7 @@ def create_parcel_endpoint(
         logger.info("New session created: session_id={}", session_id)
         response.set_cookie(key="session_id", value=session_id)
 
-    parcel = create_parcel(db=db, parcel_data=parcel_data, session_id=session_id)
+    parcel = await create_parcel(db=db, parcel_data=parcel_data, session_id=session_id)
     logger.info(
         "Parcel created: id={}, session_id={}, name={}",
         parcel.id,
@@ -40,10 +40,10 @@ def create_parcel_endpoint(
 
 
 @router.get("/parcels/{parcel_id}", response_model=ParcelResponse)
-def get_parcel_by_id_endpoint(
+async def get_parcel_by_id_endpoint(
     parcel_id: int,
     request: Request,
-    db: Session = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),  # noqa: B008
 ) -> ParcelResponse:
     session_id = request.cookies.get("session_id")
     logger.info(
@@ -56,7 +56,7 @@ def get_parcel_by_id_endpoint(
         logger.warning("Get parcel by id failed: no session, parcel_id={}", parcel_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcel not found")
 
-    parcel = get_parcel_by_id(db=db, parcel_id=parcel_id, session_id=session_id)
+    parcel = await get_parcel_by_id(db=db, parcel_id=parcel_id, session_id=session_id)
 
     if parcel is None:
         logger.warning(
@@ -78,13 +78,13 @@ def get_parcel_by_id_endpoint(
 
 
 @router.get("/parcels", response_model=list[ParcelResponse])
-def get_parcels_endpoint(
+async def get_parcels_endpoint(
     request: Request,
     limit: int = 10,
     offset: int = 0,
     type_id: int | None = None,
     has_delivery_cost: bool | None = None,
-    db: Session = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),  # noqa: B008
 ) -> list[ParcelResponse]:
     session_id = request.cookies.get("session_id")
     logger.info(
@@ -98,7 +98,7 @@ def get_parcels_endpoint(
     if session_id is None:
         logger.warning("Get parcels request without session")
         return []
-    parcels = get_parcels(
+    parcels = await get_parcels(
         type_id=type_id,
         limit=limit,
         offset=offset,
@@ -115,9 +115,9 @@ def get_parcels_endpoint(
 
 
 @router.post("/parcels/calculate", response_model=list[ParcelResponse])
-def calculate_parcel_endpoint(
+async def calculate_parcel_endpoint(
     request: Request,
-    db: Session = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),  # noqa: B008
 ) -> list[ParcelResponse]:
     session_id = request.cookies.get("session_id")
     logger.info("Calculate parcels request: session_id={}", session_id)
@@ -126,7 +126,7 @@ def calculate_parcel_endpoint(
         logger.warning("Calculate parcels failed: no session")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
 
-    parcels = calculate_delivery_for_parcels(db=db, session_id=session_id)
+    parcels = await calculate_delivery_for_parcels(db=db, session_id=session_id)
     logger.info(
         "Calculated delivery cost for {} parcels, session_id={}",
         len(parcels),

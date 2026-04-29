@@ -30,4 +30,6 @@ class Parcel(Base):
         DateTime(), default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    parcel_type: Mapped["ParcelType"] = relationship("ParcelType", back_populates="parcels")
+    parcel_type: Mapped["ParcelType"] = relationship(
+        "ParcelType", back_populates="parcels", lazy="selectin"
+    )
