@@ -4,9 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.session import get_or_create_session_id
-from app.repositories.parcel import create_parcel, get_parcel_by_id, get_parcels
 from app.schemas.parcel import ParcelCreate, ParcelResponse
 from app.services.calculate_delivery import calculate_delivery_for_parcels
+from app.services.parcel import (
+    create_parcel_for_session,
+    get_parcel_by_id_for_session,
+    get_parcels_for_session,
+)
 
 router = APIRouter()
 
@@ -29,7 +33,7 @@ async def create_parcel_endpoint(
         logger.info("New session created: session_id={}", session_id)
         response.set_cookie(key="session_id", value=session_id)
 
-    parcel = await create_parcel(db=db, parcel_data=parcel_data, session_id=session_id)
+    parcel = await create_parcel_for_session(db=db, parcel_data=parcel_data, session_id=session_id)
     logger.info(
         "Parcel created: id={}, session_id={}, name={}",
         parcel.id,
@@ -56,7 +60,7 @@ async def get_parcel_by_id_endpoint(
         logger.warning("Get parcel by id failed: no session, parcel_id={}", parcel_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcel not found")
 
-    parcel = await get_parcel_by_id(db=db, parcel_id=parcel_id, session_id=session_id)
+    parcel = await get_parcel_by_id_for_session(db=db, parcel_id=parcel_id, session_id=session_id)
 
     if parcel is None:
         logger.warning(
@@ -98,7 +102,7 @@ async def get_parcels_endpoint(
     if session_id is None:
         logger.warning("Get parcels request without session")
         return []
-    parcels = await get_parcels(
+    parcels = await get_parcels_for_session(
         type_id=type_id,
         limit=limit,
         offset=offset,

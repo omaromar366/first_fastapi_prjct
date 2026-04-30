@@ -79,4 +79,10 @@ raw:
 # Комплексные цели
 # ===============================
 # Локальный быстрый прогон с автофиксом Ruff
-check: lint fmt type security cc hal raw
+check:
+	poetry run ruff check src --fix
+	poetry run ruff format src
+	poetry run mypy src
+	poetry run bandit -r src -lll -x .venv,venv,build,dist,migrations
+	poetry run radon hal src
+	poetry run radon raw src
