@@ -49,9 +49,11 @@ def test_get_parcels_returns_only_current_session_parcels(client):
 
     data = response.json()
 
-    assert len(data) == 2
+    items = data["items"]
 
-    names = [item["name"] for item in data]
+    assert len(items) == 2
+
+    names = [item["name"] for item in items]
     assert "Jacket" in names
     assert "Phone" in names
 
@@ -59,7 +61,7 @@ def test_get_parcels_returns_only_current_session_parcels(client):
     other_response = other_client.get("/parcels")
 
     assert other_response.status_code == 200
-    assert other_response.json() == []
+    assert other_response.json() == {"items": []}
 
 def test_get_parcel_by_id_only_for_owner(client):
     payload = {
@@ -107,9 +109,11 @@ def test_calculate_delivery_cost(mock_rate, client):
 
     data = response.json()
 
-    assert len(data) == 1
+    items = data["items"]
 
-    parcel = data[0]
+    assert len(items) == 1
+
+    parcel = items[0]
 
     expected_cost = ((2.0 * 0.5) + (1000 * 0.01)) * 100
 

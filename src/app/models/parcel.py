@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Numeric, String, func
+from sqlalchemy import DateTime, ForeignKey, Index, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.base import Base
@@ -13,6 +13,16 @@ if TYPE_CHECKING:
 
 class Parcel(Base):
     __tablename__ = "parcels"
+
+    __table_args__ = (
+        Index("ix_parcels_session_id", "session_id"),
+        Index("ix_parcels_type_id", "type_id"),
+        Index(
+            "ix_parcels_session_delivery_cost",
+            "session_id",
+            "delivery_cost_rub",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     session_id: Mapped[str] = mapped_column(String(255), nullable=False)

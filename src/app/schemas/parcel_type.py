@@ -6,3 +6,7 @@ class ParcelTypeResponse(BaseModel):
     name: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ParcelTypeListResponse(BaseModel):
+    items: list[ParcelTypeResponse]

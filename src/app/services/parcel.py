@@ -14,6 +14,7 @@ async def create_parcel_for_session(
     parcel_data: ParcelCreate,
     session_id: str,
 ) -> Parcel:
+    """Create parcel for current user session."""
     return await create_parcel(
         db=db,
         parcel_data=parcel_data,
@@ -26,6 +27,7 @@ async def get_parcel_by_id_for_session(
     parcel_id: int,
     session_id: str,
 ) -> Parcel | None:
+    """Get parcel by id for current user session."""
     return await get_parcel_by_id(
         db=db,
         parcel_id=parcel_id,
@@ -41,6 +43,7 @@ async def get_parcels_for_session(
     type_id: int | None = None,
     has_delivery_cost: bool | None = None,
 ) -> list[Parcel]:
+    """Get parcels for current user session."""
     return await get_parcels(
         db=db,
         session_id=session_id,

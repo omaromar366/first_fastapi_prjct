@@ -14,7 +14,8 @@ async def get_usd_to_rub_rate() -> Decimal:
     try:
         cached_rate = await redis_client.get(USD_RATE_CACHE_KEY)
     except Exception:
-        cached_rate = None
+        logger.exception("Failed to read USD rate from Redis")
+        raise
 
     if cached_rate is not None:
         logger.info("Currency cache hit for key {}", USD_RATE_CACHE_KEY)
@@ -23,7 +24,16 @@ async def get_usd_to_rub_rate() -> Decimal:
     logger.info("Currency cache miss for key {}", USD_RATE_CACHE_KEY)
     usd_rate = await get_usd_rate()
 
-    await redis_client.set(USD_RATE_CACHE_KEY, str(usd_rate), ex=USD_RATE_TTL)
-    logger.info("Saved USD rate {} to Redis with TTL {} seconds", usd_rate, USD_RATE_TTL)
+    try:
+        await redis_client.set(USD_RATE_CACHE_KEY, str(usd_rate), ex=USD_RATE_TTL)
+    except Exception:
+        logger.exception("Failed to save USD rate to Redis")
+        raise
+
+    logger.info(
+        "Saved USD rate {} to Redis with TTL {} seconds",
+        usd_rate,
+        USD_RATE_TTL,
+    )
 
     return usd_rate

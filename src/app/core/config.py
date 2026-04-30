@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     redis_port: int
     redis_db: int
 
+    cbr_url: str
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",

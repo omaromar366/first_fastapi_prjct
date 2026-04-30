@@ -5,10 +5,11 @@ def test_get_parcel_types(client):
 
     data = response.json()
 
-    assert isinstance(data, list)
-    assert len(data) == 3
+    assert isinstance(data, dict)
+    assert "items" in data
+    assert len(data["items"]) == 3
 
-    names = [item["name"] for item in data]
+    names = [item["name"] for item in data["items"]]
 
     assert "одежда" in names
     assert "электроника" in names

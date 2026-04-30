@@ -31,3 +31,7 @@ class ParcelResponse(BaseModel):
         return str(value)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ParcelListResponse(BaseModel):
+    items: list[ParcelResponse]

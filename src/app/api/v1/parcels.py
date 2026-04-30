@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.session import get_or_create_session_id
-from app.schemas.parcel import ParcelCreate, ParcelResponse
+from app.schemas.parcel import ParcelCreate, ParcelListResponse, ParcelResponse
 from app.services.calculate_delivery import calculate_delivery_for_parcels
 from app.services.parcel import (
     create_parcel_for_session,
@@ -22,6 +22,7 @@ async def create_parcel_endpoint(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> ParcelResponse:
+    """Create a new parcel."""
     session_id, is_new = get_or_create_session_id(request)
     logger.info(
         "Create parcel request received: session_id={}, name={}, type_id={}",
@@ -49,6 +50,7 @@ async def get_parcel_by_id_endpoint(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> ParcelResponse:
+    """Get parcel by id."""
     session_id = request.cookies.get("session_id")
     logger.info(
         "Get parcel by id request: parcel_id={}, session_id={}",
@@ -81,7 +83,7 @@ async def get_parcel_by_id_endpoint(
     return parcel
 
 
-@router.get("/parcels", response_model=list[ParcelResponse])
+@router.get("/parcels", response_model=ParcelListResponse)
 async def get_parcels_endpoint(
     request: Request,
     limit: int = 10,
@@ -89,7 +91,8 @@ async def get_parcels_endpoint(
     type_id: int | None = None,
     has_delivery_cost: bool | None = None,
     db: AsyncSession = Depends(get_db),
-) -> list[ParcelResponse]:
+) -> ParcelListResponse:
+    """Get parcels endpoint."""
     session_id = request.cookies.get("session_id")
     logger.info(
         "Get parcels request: session_id={}, limit={}, offset={}, type_id={}, has_delivery_cost={}",
@@ -101,7 +104,7 @@ async def get_parcels_endpoint(
     )
     if session_id is None:
         logger.warning("Get parcels request without session")
-        return []
+        return ParcelListResponse(items=[])
     parcels = await get_parcels_for_session(
         type_id=type_id,
         limit=limit,
@@ -115,14 +118,15 @@ async def get_parcels_endpoint(
         len(parcels),
         session_id,
     )
-    return parcels
+    return ParcelListResponse(items=parcels)
 
 
-@router.post("/parcels/calculate", response_model=list[ParcelResponse])
+@router.post("/parcels/calculate", response_model=ParcelListResponse)
 async def calculate_parcel_endpoint(
     request: Request,
     db: AsyncSession = Depends(get_db),
-) -> list[ParcelResponse]:
+) -> ParcelListResponse:
+    """Calculate delivery cost for parcels endpoint."""
     session_id = request.cookies.get("session_id")
     logger.info("Calculate parcels request: session_id={}", session_id)
 
@@ -137,4 +141,4 @@ async def calculate_parcel_endpoint(
         session_id,
     )
 
-    return parcels
+    return ParcelListResponse(items=parcels)

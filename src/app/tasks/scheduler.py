@@ -8,6 +8,7 @@ scheduler = AsyncIOScheduler()
 
 
 async def calculate_delivery_job() -> None:
+    """Calculate delivery cost for all unpriced parcels."""
     logger.info("Scheduler job started")
     try:
         async with AsyncSessionLocal() as db:
@@ -20,6 +21,7 @@ async def calculate_delivery_job() -> None:
 
 
 def start_scheduler() -> None:
+    """Scheduler startup."""
     if scheduler.get_job("calculate_delivery_job") is None:
         scheduler.add_job(
             calculate_delivery_job,
