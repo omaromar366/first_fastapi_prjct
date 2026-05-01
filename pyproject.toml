@@ -1,0 +1,80 @@
+[project]
+name = "first-fastapi-prjct"
+version = "0.1.0"
+description = ""
+authors = [
+    { name = "Your Name", email = "you@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "ruff (>=0.15.10,<0.16.0)",
+    "mypy (>=1.20.1,<2.0.0)",
+    "typing-extensions (>=4.15.0,<5.0.0)",
+    "bandit (>=1.9.4,<2.0.0)",
+    "radon (>=6.0.1,<7.0.0)",
+    "pre-commit (>=4.5.1,<5.0.0)",
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic-settings",
+    "alembic (>=1.18.4,<2.0.0)",
+    "psycopg (>=3.3.3,<4.0.0)",
+    "pydantic (>=2.13.2,<3.0.0)",
+    "redis (>=7.4.0,<8.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "apscheduler (>=3.11.2,<4.0.0)",
+    "loguru (>=0.7.3,<0.8.0)",
+    "asyncpg (>=0.31.0,<0.32.0)",
+    "aiohttp (>=3.13.5,<4.0.0)",
+    "greenlet (>=3.5.0,<4.0.0)",
+    "aiosqlite (>=0.22.1,<0.23.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "app"]
+extend-exclude = [".venv", "venv", "build", "dist", "__pycache__", "migrations"]
+
+[tool.ruff.lint]
+# Набор правил: базовые ошибки/предупреждения + сортировка импортов + апгрейды и упрощения
+select = ["E4", "E7", "E9", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "src"]
+combine-as-imports = true
+force-sort-within-sections = true
+
+[tool.ruff.format]
+quote-style = "double"     # "double" | "single"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+
+[tool.poetry]
+name = "first-fastapi-prjct"
+version = "0.1.0"
+
+packages = [
+    { include = "app", from = "src" }
+]
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.3,<10.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "pytest-asyncio (>=1.3.0,<2.0.0)"
+]
